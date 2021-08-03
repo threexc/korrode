@@ -1,0 +1,20 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: rust-build-and-test-pipeline-run
+  namespace: rust-build
+  generateName: rust-build-and-test-
+spec:
+  pipelineRef:
+    name: rust-build-and-test-pipeline
+  params:
+    - name: git_url
+      value: "https://github.com/uutils/coreutils.git"
+    - name: git_revision
+      value: "master"
+  podTemplate:
+    volumes:
+    - name: build
+      hostPath:
+        path: /tekton/pipelines/rust

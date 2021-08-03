@@ -1,0 +1,44 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone-repo
+  namespace: rust-build
+spec:
+  params:
+    - name: git_url
+      description: Repository URL to clone from
+    - name: git_revision
+      description: Revision to checkout.
+      default: ""
+  results:
+    - name: directory
+      description: The directory containing the cloned repo
+  steps:
+    - name: clone-repo
+      image: rust:latest
+      workingDir: /workspace
+      env:
+        - name: PARAM_URL
+          value: $(params.git_url)
+        - name: PARAM_REVISION
+          value: $(params.git_revision)
+      script: |
+        #!/bin/bash -e
+
+        DIRNAME=$(basename -s .git "$PARAM_URL")
+        echo "Removing ${DIRNAME} if it exists..."
+        rm -rf "${DIRNAME}"
+
+        if [ -z "$PARAM_REVISION" ]; then
+            git clone "${PARAM_URL}"
+        else
+            git clone "${PARAM_URL}"  --branch "${PARAM_REVISION}"
+        fi
+
+        echo "Done."
+
+        echo -n "${DIRNAME}" > "$(results.directory.path)"
+      volumeMounts:
+      - name: build
+        mountPath: /workspace

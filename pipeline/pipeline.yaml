@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: rust-build-and-test-pipeline
+  namespace: rust-build
+spec:
+  params:
+    - name: git_url
+      description: The URL of the repo to clone
+    - name: git_revision
+      description: The revision of the repo to clone
+  tasks:
+  - name: git-clone-repo
+    taskRef:
+      name: git-clone-repo
+    params:
+      - name: git_url
+        value: "$(params.git_url)"
+      - name: git_revision
+        value: "$(params.git_revision)"
+  - name: cargo-build
+    taskRef:
+      name: cargo-build
+    params:
+      - name: directory
+        value: "$(tasks.git-clone-repo.results.directory)"
+    runAfter:
+      - git-clone-repo
+  - name: cargo-test
+    taskRef:
+      name: cargo-test
+    params:
+      - name: directory
+        value: "$(tasks.git-clone-repo.results.directory)"
+    runAfter:
+      - cargo-build

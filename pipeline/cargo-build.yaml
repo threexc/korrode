@@ -1,0 +1,22 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: cargo-build
+  namespace: rust-build
+spec:
+  params:
+    - name: directory
+      description: Directory containing the source to build
+  steps:
+    - name: cargo-build
+      image: rust:latest
+      workingDir: /workspace/$(params.directory)
+      script: |
+        #!/bin/bash -e
+
+        cargo build
+
+      volumeMounts:
+      - name: build
+        mountPath: /workspace
