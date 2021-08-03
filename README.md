@@ -1,4 +1,4 @@
-# corrode
+# korrode
 
 Tekton pipelines for building and testing Rust projects from source.
 
